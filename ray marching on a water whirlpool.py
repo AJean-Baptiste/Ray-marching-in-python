@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
-D = 5 #domaine d'étude
-N = 100000 #resolution
+D = 5 #study zone in meter
+N = 100000 #resolution of simulation (iteration for D meter)
 
 """propriété du rayon"""
 y0 = 2.45
@@ -14,14 +14,14 @@ nombreRayon = 1
 deltaY = 0
 """"""""""""""""""""""""
 
-"""propriété du siphon"""
+"""whirlpool property"""
 hi = 2.25
 g = 9.81
 rc = 0.016
 gamma = 0.265
 """"""""""""""""""""""""""
 
-def f (r): #fonction de surface
+def f (r): #whirlpool function
     h = np.zeros(N)
     for k in range (0, N):
         if r[k] < -(rc) or r[k] > rc :
@@ -30,14 +30,14 @@ def f (r): #fonction de surface
             h[k] = (((gamma*r[k])*(gamma*r[k]))/(8*g*(math.pi)*(math.pi)*rc*rc*rc*rc))+hi-(gamma*gamma)/(4*g*(math.pi)*(math.pi)*rc*rc)     
     return h
 
-def fp (r, h): #dérivée de la fonction de surface
+def fp (r, h): #dérivative of whirlpool function
     hp = np.zeros(N)
     for k in range(0, N-1): 
         hp[k] = (h[k+1] - h[k]) / (r[k+1] - r[k])
     return hp
 
 
-def difference (y0, y1, h0, h1): #fonction de calcul de colision   
+def difference (y0, y1, h0, h1): #collision function 
     y0 = y0-h0
     y1 = y1-h1
     if y0*y1 > 0:
@@ -47,7 +47,7 @@ def difference (y0, y1, h0, h1): #fonction de calcul de colision
     
     
 
-"""tracé du siphon"""
+"""plot of whirlpool"""
 r = np.linspace(-D/2, D/2, N)
 h = np.zeros(N)
 h = f(r)
@@ -60,7 +60,7 @@ varTest = False
 for w in range (nombreRayon):
     newY = newY-deltaY
     y0 = newY
-    """------------------------------------tracé du Rayon--------------------------------------------"""
+    """------------------------------------Ray tracing--------------------------------------------"""
     angleIncidence = angle*math.pi/180
     milieu = 0
     if y0 <= h[0]:
@@ -79,20 +79,20 @@ for w in range (nombreRayon):
     
     for k in range (1,longueur):    
        
-        """calcul du rayon dans l'air"""
+        """ray tracing in air"""
         if milieu == 0:
-            if int(((x1+(D/2))/D)*N)>=N or int(((x1+(D/2))/D)*N)<0: #verif de "out of bound exception"
+            if int(((x1+(D/2))/D)*N)>=N or int(((x1+(D/2))/D)*N)<0: #for "out of bound exception"
                 xRayon[k] = x0
                 yRayon[k] = y0
             else:
                 
                 
-                """test s'il il y a changement de milieu air -> eau"""
+                """test if change air -> water"""
                 if collision:
                     
                     milieu = 1
                     
-                    """calcul de l'angle réfracté""" 
+                    """refraction""" 
                     coefDirTangente = hp[int(((x1+(D/2))/D)*N)]
                         
                     angleTangente = abs(math.atan(coefDirTangente))
@@ -114,7 +114,7 @@ for w in range (nombreRayon):
                 x0 = x1
                 y0 = y1
     
-        """calcul du rayon dans l'eau"""
+        """ray in water"""
         if milieu == 1:
             
             if int(((x1+(D/2))/D)*N)>=N or int(((x1+(D/2))/D)*N)<0: #verif de "out of bound exception"
@@ -122,11 +122,11 @@ for w in range (nombreRayon):
                 yRayon[k] = y0
             else:
                 
-                """test s'il il y a changement de milieu eau -> air"""
+                """test change water -> air"""
                 if collision:
                     milieu = 0
                 
-                    """calcul de l'angle réfracté ou de la reflexion totale"""
+                    """refraction angle or reflection angle"""
                     coefDirTangente = hp[int(((x1+(D/2))/D)*N)]
                 
                     angleTangente = abs(math.atan(coefDirTangente))
